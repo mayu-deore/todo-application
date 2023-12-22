@@ -1,5 +1,6 @@
 // Tasks.js
 import React, { useState } from 'react';
+import './Tasks.css';
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -11,10 +12,20 @@ const Tasks = () => {
   });
 
   const [completedTasks, setCompletedTasks] = useState([]);
+  const [editingTaskId, setEditingTaskId] = useState(null);
 
   const handleAddTask = () => {
     if (newTask.title.trim() !== '' && newTask.description.trim() !== '' && newTask.startDate.trim() !== '') {
-      setTasks([...tasks, { ...newTask, id: Date.now() }]);
+      if (editingTaskId !== null) {
+        // Update existing task
+        setTasks(tasks.map((task) => (task.id === editingTaskId ? { ...task, ...newTask } : task)));
+        setEditingTaskId(null);
+      } else {
+        // Add new task
+        setTasks([...tasks, { ...newTask, id: Date.now() }]);
+      }
+
+      // Clear the form
       setNewTask({
         title: '',
         description: '',
@@ -24,12 +35,9 @@ const Tasks = () => {
     }
   };
 
-  const handleEditTask = (taskId, newTaskData) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId ? { ...task, ...newTaskData } : task
-      )
-    );
+  const handleEditTask = (taskId, taskData) => {
+    setNewTask(taskData);
+    setEditingTaskId(taskId);
   };
 
   const handleDeleteTask = (taskId) => {
@@ -69,7 +77,7 @@ const Tasks = () => {
           value={newTask.startDate}
           onChange={(e) => setNewTask({ ...newTask, startDate: e.target.value })}
         />
-        <button onClick={handleAddTask}>Add Task</button>
+        <button onClick={handleAddTask}>{editingTaskId !== null ? 'Update Task' : 'Add Task'}</button>
       </div>
       <div>
         <h2>Tasks</h2>
@@ -88,19 +96,17 @@ const Tasks = () => {
                 <td>{task.title}</td>
                 <td>{task.description}</td>
                 <td>{task.startDate}</td>
-                <td>
-                  <button onClick={() => handleEditTask(task.id, { title: prompt('Edit title:', task.title), description: prompt('Edit description:', task.description), startDate: prompt('Edit start date:', task.startDate) })}>Edit</button>
-                  <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
-                  <button onClick={() => handleCompleteTask(task.id)}>
-                    Mark as Completed
-                  </button>
+                <td style={{display:"flex", gap:"20px"}}>
+                  <button style={{backgroundColor:"blue"}} onClick={() => handleEditTask(task.id, task)}>Edit</button>
+                  <button style={{backgroundColor:"red"}} onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                  <button onClick={() => handleCompleteTask(task.id)}>Mark as Completed</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div>
+      <div className="completed-tasks">
         <h2>Completed Tasks</h2>
         <table>
           <thead>
@@ -117,12 +123,10 @@ const Tasks = () => {
                 <td>{task.title}</td>
                 <td>{task.description}</td>
                 <td>{task.startDate}</td>
-                <td>
-                  <button onClick={() => handleEditTask(task.id, { title: prompt('Edit title:', task.title), description: prompt('Edit description:', task.description), startDate: prompt('Edit start date:', task.startDate) })}>Edit</button>
-                  <button onClick={() => handleDeleteTask(task.id)}>Delete</button>
-                  <button onClick={() => handleIncompleteTask(task.id)}>
-                    Mark as Incomplete
-                  </button>
+                <td style={{display:"flex", gap:"20px"}}>
+                  <button style={{backgroundColor:"blue"}} onClick={() => handleEditTask(task.id, task)}>Edit</button>
+                  <button style={{backgroundColor:"red"}} onClick={() => handleDeleteTask(task.id)}>Delete</button>
+                  <button onClick={() => handleIncompleteTask(task.id)}>Mark as Incomplete</button>
                 </td>
               </tr>
             ))}
